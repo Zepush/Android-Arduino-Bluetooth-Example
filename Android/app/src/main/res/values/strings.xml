@@ -1,0 +1,14 @@
+<resources>
+    <string name="app_name">Android-Remote-Monitor-Example</string>
+
+    <string name="enable_bluetooth">Enable the Bluetooth!</string>
+    <string name="temperature">Temperature:</string>
+    <string name="nan">NAN</string>
+    <string name="humidity">Humidity:</string>
+    <string name="max_t">MAX T:</string>
+    <string name="min_t">MIN T:</string>
+    <string name="max_h">MAX H:</string>
+    <string name="min_h">MIN H:</string>
+    <string name="selected_device">Selected device:</string>
+    <string name="not_selected">Not selected</string>
+</resources>
