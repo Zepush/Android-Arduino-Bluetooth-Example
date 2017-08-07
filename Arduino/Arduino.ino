@@ -13,6 +13,8 @@
 // Sensor initialization:
 DHT dht(DHT_PIN, DHT22);
 
+boolean firstLoop = true; // Variable for the first loop initialization.
+
 int firstLoop = 0; // Variable for loop definition.
 
 float temp, humid, MAXT, MINT, MAXH, MINH; // Temperature and humidity + MAX / MIN parameters.
@@ -32,7 +34,13 @@ void setup() {
 void(* resetFunc) (void) = 0;
 
 void loop() {
-  delay (2000);
+  if (firstLoop) {
+    delay (2000)
+      
+      firstLoop = false;
+  } else {
+    delay(1400);
+  }
 
   temp = dht.readTemperature(); // Get the temperature.
   humid = dht.readHumidity(); // Get the humidity.
