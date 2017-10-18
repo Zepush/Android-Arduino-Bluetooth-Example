@@ -288,7 +288,7 @@ public class MainActivity
             @Override
             public void onClick(View view) {
                 switch (view.getId()) {
-                    case R.id.ibBluetoothOnOff:
+                    case R.id.ib_bluetooth_on_off:
                         if(mBtAdapter.isEnabled()) {
                             mBtAdapter.disable(); // Disable.
                             mIBBluetoothOnOff.setImageResource(R.drawable.bluetooth_on);
@@ -298,14 +298,14 @@ public class MainActivity
                         }
 
                         break;
-                    case R.id.ibConnectDisconnect:
+                    case R.id.ib_connect_disconnect:
                         if(mBtAdapter.isEnabled()) {
                             if(!mBtConnectionState) mConnect(); // Connect.
                             else mDisconnect(); // Disconnect.
                         } else mToast("Turn on Bluetooth!");
 
                         break;
-                    case R.id.ibRefresh:
+                    case R.id.ib_refresh:
                         if(mBtAdapter.isEnabled()) mConnectedThread.write(mREBOOT_SYMBOL); // Write.
                         else mToast(getString(R.string.enable_bluetooth)); // Show a warning toast.
 
@@ -320,19 +320,19 @@ public class MainActivity
     }
 
     private void mInitialization() {
-        mTVShowTemp = (TextView) findViewById(R.id.tvShowTemp);
-        mTVShowHumid = (TextView) findViewById(R.id.tvShowHumid);
-        mTVShowMAXT = (TextView) findViewById(R.id.tvShowMAXT);
-        mTVShowMINT = (TextView) findViewById(R.id.tvShowMINT);
-        mTVShowMAXH = (TextView) findViewById(R.id.tvShowMAXH);
-        mTVShowMINH = (TextView) findViewById(R.id.tvShowMINH);
-        mTVShowSelectedDevice = (TextView) findViewById(R.id.tvSelectedDevice);
+        mTVShowTemp = (TextView) findViewById(R.id.tv_show_temp);
+        mTVShowHumid = (TextView) findViewById(R.id.tv_show_humid);
+        mTVShowMAXT = (TextView) findViewById(R.id.tv_show_MAX_T);
+        mTVShowMINT = (TextView) findViewById(R.id.tv_show_MIN_T);
+        mTVShowMAXH = (TextView) findViewById(R.id.tv_show_MAX_H);
+        mTVShowMINH = (TextView) findViewById(R.id.tv_show_MIN_H);
+        mTVShowSelectedDevice = (TextView) findViewById(R.id.tv_selected_device);
 
-        mLVPairedDevices = (ListView) findViewById(R.id.lvPairedDevices);
+        mLVPairedDevices = (ListView) findViewById(R.id.lv_paired_devices);
 
-        mIBBluetoothOnOff = (ImageButton) findViewById(R.id.ibBluetoothOnOff);
-        mIBConnectDisconnect = (ImageButton) findViewById(R.id.ibConnectDisconnect);
-        mIBRefresh = (ImageButton) findViewById(R.id.ibRefresh);
+        mIBBluetoothOnOff = (ImageButton) findViewById(R.id.ib_bluetooth_on_off);
+        mIBConnectDisconnect = (ImageButton) findViewById(R.id.ib_connect_disconnect);
+        mIBRefresh = (ImageButton) findViewById(R.id.ib_refresh);
 
         // Register a Receiver:
         registerReceiver(mReceiverBluetoothWaiting, new IntentFilter(BluetoothAdapter.ACTION_STATE_CHANGED));
