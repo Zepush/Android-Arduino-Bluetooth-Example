@@ -1,5 +1,6 @@
 package com.fomchenkovoutlook.artem.android_remote_monitor_example;
 
+import android.annotation.SuppressLint;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothSocket;
@@ -78,7 +79,9 @@ public class MainActivity
     private String mSBPrint; // Save the received message.
 
     // Control connection and I/O (Class):
-    private class ConnectedThread extends Thread {
+    private class ConnectedThread
+            extends Thread {
+
         private BluetoothSocket mBtSocketCT;
         private InputStream mInStream;
         private OutputStream mOutStream;
@@ -91,7 +94,8 @@ public class MainActivity
             try {
                 tmpIn = socket.getInputStream();
                 tmpOut = socket.getOutputStream();
-            } catch (IOException ignored) {
+            } catch (IOException e) {
+                e.printStackTrace();
             }
 
             mInStream = tmpIn;
@@ -106,9 +110,12 @@ public class MainActivity
                 // Receive the data and send it to the Handler:
                 try {
                     bytes = mInStream.read(buffer);
+
                     mHandlerMessage.obtainMessage(mRECEIVE_MESSAGE, bytes, -1, buffer)
                             .sendToTarget();
                 } catch (IOException e) {
+                    e.printStackTrace();
+
                     break;
                 }
             }
@@ -120,7 +127,8 @@ public class MainActivity
             // Write:
             try {
                 mOutStream.write(msgBuffer);
-            } catch (IOException ignored) {
+            } catch (IOException e) {
+                e.printStackTrace();
             }
         }
 
@@ -129,7 +137,8 @@ public class MainActivity
             // Cancel connection:
             try {
                 mBtSocketCT.close();
-            } catch (IOException ignored) {
+            } catch (IOException e) {
+                e.printStackTrace();
             }
         }
     }
@@ -161,15 +170,20 @@ public class MainActivity
     }
 
     // Handler to work with the received data:
+    @SuppressLint("HandlerLeak")
     private void mHandlerMessageView() {
         mHandlerMessage = new Handler() {
             public void handleMessage(Message msg) {
                 switch (msg.what) {
                     case mRECEIVE_MESSAGE:
                         byte[] readBuffer = (byte[]) msg.obj;
+
                         String strInCOM = new String(readBuffer, 0, msg.arg1);
+
                         mStringBuilder.append(strInCOM);
+
                         int endOfLineIndex = mStringBuilder.indexOf("\r\n");
+
                         if (endOfLineIndex > 0) {
                             mSBPrint = mStringBuilder.substring(0, endOfLineIndex);
                             mStringBuilder.delete(0, mStringBuilder.length());
@@ -219,6 +233,7 @@ public class MainActivity
                 if (intent.getIntExtra(BluetoothAdapter.EXTRA_STATE, 0)
                         == BluetoothAdapter.STATE_ON) {
                     mIBBluetoothOnOff.setImageResource(R.drawable.bluetooth_off);
+
                     mGetPairedDevicesList(); // Show the list of paired devices.
                 } else if (intent.getIntExtra(BluetoothAdapter.EXTRA_STATE, 0)
                         == BluetoothAdapter.STATE_OFF) {
@@ -320,19 +335,19 @@ public class MainActivity
     }
 
     private void mInitialization() {
-        mTVShowTemp = (TextView) findViewById(R.id.tv_show_temp);
-        mTVShowHumid = (TextView) findViewById(R.id.tv_show_humid);
-        mTVShowMAXT = (TextView) findViewById(R.id.tv_show_MAX_T);
-        mTVShowMINT = (TextView) findViewById(R.id.tv_show_MIN_T);
-        mTVShowMAXH = (TextView) findViewById(R.id.tv_show_MAX_H);
-        mTVShowMINH = (TextView) findViewById(R.id.tv_show_MIN_H);
-        mTVShowSelectedDevice = (TextView) findViewById(R.id.tv_selected_device);
+        mTVShowTemp = findViewById(R.id.tv_show_temp);
+        mTVShowHumid = findViewById(R.id.tv_show_humid);
+        mTVShowMAXT = findViewById(R.id.tv_show_MAX_T);
+        mTVShowMINT = findViewById(R.id.tv_show_MIN_T);
+        mTVShowMAXH = findViewById(R.id.tv_show_MAX_H);
+        mTVShowMINH = findViewById(R.id.tv_show_MIN_H);
+        mTVShowSelectedDevice = findViewById(R.id.tv_selected_device);
 
-        mLVPairedDevices = (ListView) findViewById(R.id.lv_paired_devices);
+        mLVPairedDevices = findViewById(R.id.lv_paired_devices);
 
-        mIBBluetoothOnOff = (ImageButton) findViewById(R.id.ib_bluetooth_on_off);
-        mIBConnectDisconnect = (ImageButton) findViewById(R.id.ib_connect_disconnect);
-        mIBRefresh = (ImageButton) findViewById(R.id.ib_refresh);
+        mIBBluetoothOnOff = findViewById(R.id.ib_bluetooth_on_off);
+        mIBConnectDisconnect = findViewById(R.id.ib_connect_disconnect);
+        mIBRefresh = findViewById(R.id.ib_refresh);
 
         // Register a Receiver:
         registerReceiver(mReceiverBluetoothWaiting, new IntentFilter(BluetoothAdapter.ACTION_STATE_CHANGED));
@@ -357,6 +372,7 @@ public class MainActivity
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
         setContentView(R.layout.activity_main);
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT); // Only portrait.
 
