@@ -22,6 +22,8 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.fomchenkovoutlook.artem.android_remote_monitor_example.interfaces.InitializationInterface;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -30,7 +32,8 @@ import java.util.Set;
 import java.util.UUID;
 
 public class MainActivity
-        extends AppCompatActivity {
+        extends AppCompatActivity
+            implements InitializationInterface {
 
     private TextView mTVShowTemp;
     private TextView mTVShowHumid;
@@ -86,7 +89,7 @@ public class MainActivity
         private InputStream mInStream;
         private OutputStream mOutStream;
 
-        ConnectedThread(BluetoothSocket socket) {
+        void getStreams(BluetoothSocket socket) {
             mBtSocketCT = socket;
             InputStream tmpIn = null;
             OutputStream tmpOut = null;
@@ -100,6 +103,10 @@ public class MainActivity
 
             mInStream = tmpIn;
             mOutStream = tmpOut;
+        }
+
+        ConnectedThread(BluetoothSocket socket) {
+            getStreams(socket);
         }
 
         public void run() {
@@ -121,10 +128,10 @@ public class MainActivity
             }
         }
 
+        // Write:
         void write(String msg) {
             byte[] msgBuffer = msg.getBytes();
 
-            // Write:
             try {
                 mOutStream.write(msgBuffer);
             } catch (IOException e) {
@@ -132,9 +139,8 @@ public class MainActivity
             }
         }
 
-        void cancel() {
-
-            // Cancel connection:
+        // Disconnect:
+        void disconnect() {
             try {
                 mBtSocketCT.close();
             } catch (IOException e) {
@@ -190,27 +196,33 @@ public class MainActivity
 
                             switch (mSBPrint.substring(0, 1)) {
                                 case mTEMP_SYMBOL:
-                                    mTVShowTemp.setText(mSBPrint.substring(1, endOfLineIndex));
+                                    mTVShowTemp.setText(mSBPrint
+                                            .substring(1, endOfLineIndex));
 
                                     break;
                                 case mHUMID_SYMBOL:
-                                    mTVShowHumid.setText(mSBPrint.substring(1, endOfLineIndex));
+                                    mTVShowHumid.setText(mSBPrint
+                                            .substring(1, endOfLineIndex));
 
                                     break;
                                 case mMAXT_SYMBOL:
-                                    mTVShowMAXT.setText(mSBPrint.substring(1, endOfLineIndex));
+                                    mTVShowMAXT.setText(mSBPrint
+                                            .substring(1, endOfLineIndex));
 
                                     break;
                                 case mMINT_SYMBOL:
-                                    mTVShowMINT.setText(mSBPrint.substring(1, endOfLineIndex));
+                                    mTVShowMINT.setText(mSBPrint
+                                            .substring(1, endOfLineIndex));
 
                                     break;
                                 case mMAXH_SYMBOL:
-                                    mTVShowMAXH.setText(mSBPrint.substring(1, endOfLineIndex));
+                                    mTVShowMAXH.setText(mSBPrint
+                                            .substring(1, endOfLineIndex));
 
                                     break;
                                 case mMINH_SYMBOL:
-                                    mTVShowMINH.setText(mSBPrint.substring(1, endOfLineIndex));
+                                    mTVShowMINH.setText(mSBPrint
+                                            .substring(1, endOfLineIndex));
 
                                     break;
                             }
@@ -273,11 +285,22 @@ public class MainActivity
 
     // Disconnection method:
     private void mDisconnect() {
-        mConnectedThread.cancel();
+        mConnectedThread.disconnect();
 
         mBtConnectionState = false;
 
         mIBConnectDisconnect.setImageResource(R.drawable.bluetooth_connect);
+    }
+
+    // Flush Stream:
+    private void mFlushStream() {
+        if(mOutStream != null) {
+            try {
+                mOutStream.flush();
+            } catch (IOException e) {
+                mLOG(e.getMessage());
+            }
+        }
     }
 
     // A simple toast for viewing warning messages:
@@ -294,8 +317,6 @@ public class MainActivity
                 mTVShowSelectedDevice.setText(mMACAddress); // Set the selected MAC address to mTVShowSelectedDevice.
             }
         });
-
-        //mLVPairedDevices.setOnItemClickListener(this);
     }
 
     private void mSetImageButtons() {
@@ -334,7 +355,8 @@ public class MainActivity
         mIBRefresh.setOnClickListener(onClickImageButton);
     }
 
-    private void mInitialization() {
+    @Override
+    public void initialization() {
         mTVShowTemp = findViewById(R.id.tv_show_temp);
         mTVShowHumid = findViewById(R.id.tv_show_humid);
         mTVShowMAXT = findViewById(R.id.tv_show_MAX_T);
@@ -376,7 +398,7 @@ public class MainActivity
         setContentView(R.layout.activity_main);
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT); // Only portrait.
 
-        mInitialization();
+        initialization();
     }
 
     // Save the connection when the application is hidden:
@@ -384,25 +406,13 @@ public class MainActivity
     public void onPause() {
         super.onPause();
 
-        if(mOutStream != null) {
-            try {
-                mOutStream.flush();
-            } catch (IOException e) {
-                mLOG(e.getMessage());
-            }
-        }
+        mFlushStream();
     }
 
     @Override
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
 
-        if(mOutStream != null) {
-            try {
-                mOutStream.flush();
-            } catch (IOException e) {
-                mLOG(e.getMessage());
-            }
-        }
+        mFlushStream();
     }
 }
