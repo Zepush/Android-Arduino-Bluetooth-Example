@@ -22,6 +22,8 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.fomchenkovoutlook.artem.android_remote_monitor_example.interfaces.CommunicationInterface;
+import com.fomchenkovoutlook.artem.android_remote_monitor_example.interfaces.DisconnectInterface;
 import com.fomchenkovoutlook.artem.android_remote_monitor_example.interfaces.InitializationInterface;
 
 import java.io.IOException;
@@ -49,21 +51,21 @@ public class MainActivity
     private ImageButton mIBConnectDisconnect;
     private ImageButton mIBRefresh;
 
-    private static final UUID mUUID =
+    private final UUID mUUID =
             UUID.fromString("00001101-0000-1000-8000-00805F9B34FB"); // UUID.
-    private static final String mTAG = "Message from app: "; // LOG.
-    private static final int mRECEIVE_MESSAGE = 1; // Receive message.
+    private final String mTAG = "Message from app: "; // LOG.
+    private final int mRECEIVE_MESSAGE = 1; // Receive message.
 
     // Symbols for obtaining data from Arduino:
-    private static final String mTEMP_SYMBOL = "t"; // Temperature symbol.
-    private static final String mHUMID_SYMBOL = "h"; // Humidity symbol.
-    private static final String mMAXT_SYMBOL = "m"; // The value of the maximum temperature.
-    private static final String mMINT_SYMBOL = "i"; // The value of the minimum temperature.
-    private static final String mMAXH_SYMBOL = "w"; // The value of the maximum humidity.
-    private static final String mMINH_SYMBOL = "q"; // The value of the minimum humidity.
+    private final String mTEMP_SYMBOL = "t"; // Temperature symbol.
+    private final String mHUMID_SYMBOL = "h"; // Humidity symbol.
+    private final String mMAXT_SYMBOL = "m"; // The value of the maximum temperature.
+    private final String mMINT_SYMBOL = "i"; // The value of the minimum temperature.
+    private final String mMAXH_SYMBOL = "w"; // The value of the maximum humidity.
+    private final String mMINH_SYMBOL = "q"; // The value of the minimum humidity.
 
     // Symbol for sending the Arduino reboot command:
-    private static final String mREBOOT_SYMBOL = "r";
+    private final String mREBOOT_SYMBOL = "r";
 
     // Bluetooth adapter and Bluetooth socket:
     private static BluetoothAdapter mBtAdapter;
@@ -83,7 +85,8 @@ public class MainActivity
 
     // Control connection and I/O (Class):
     private class ConnectedThread
-            extends Thread {
+            extends Thread
+                implements DisconnectInterface, CommunicationInterface {
 
         private BluetoothSocket mBtSocketCT;
         private InputStream mInStream;
@@ -105,47 +108,50 @@ public class MainActivity
             mOutStream = tmpOut;
         }
 
-        ConnectedThread(BluetoothSocket socket) {
-            getStreams(socket);
+        @Override
+        public void read(byte[] buffer, int bytes)
+            throws IOException {
+
+            bytes = mInStream.read(buffer);
+
+            mHandlerMessage.obtainMessage(mRECEIVE_MESSAGE, bytes, -1, buffer)
+                    .sendToTarget();
+        }
+
+        // Write:
+        @Override
+        public void write(String data)
+                throws IOException {
+            byte[] msgBuffer = data.getBytes();
+
+            mOutStream.write(msgBuffer);
         }
 
         public void run() {
             byte[] buffer = new byte[256];
-            int bytes;
+
+            int bytes = 0;
 
             while (true) {
                 // Receive the data and send it to the Handler:
                 try {
-                    bytes = mInStream.read(buffer);
-
-                    mHandlerMessage.obtainMessage(mRECEIVE_MESSAGE, bytes, -1, buffer)
-                            .sendToTarget();
+                    read(buffer, bytes);
                 } catch (IOException e) {
                     e.printStackTrace();
-
-                    break;
                 }
             }
         }
 
-        // Write:
-        void write(String msg) {
-            byte[] msgBuffer = msg.getBytes();
+        // Disconnect:
+        @Override
+        public void disconnect()
+            throws IOException {
 
-            try {
-                mOutStream.write(msgBuffer);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+            mBtSocketCT.close();
         }
 
-        // Disconnect:
-        void disconnect() {
-            try {
-                mBtSocketCT.close();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+        ConnectedThread(BluetoothSocket socket) {
+            getStreams(socket);
         }
     }
 
@@ -285,7 +291,11 @@ public class MainActivity
 
     // Disconnection method:
     private void mDisconnect() {
-        mConnectedThread.disconnect();
+        try {
+            mConnectedThread.disconnect();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
 
         mBtConnectionState = false;
 
@@ -342,7 +352,12 @@ public class MainActivity
 
                         break;
                     case R.id.ib_refresh:
-                        if(mBtAdapter.isEnabled()) mConnectedThread.write(mREBOOT_SYMBOL); // Write.
+                        if(mBtAdapter.isEnabled())
+                            try {
+                                mConnectedThread.write(mREBOOT_SYMBOL); // Write.
+                            } catch (IOException e) {
+                                e.printStackTrace();
+                            }
                         else mToast(getString(R.string.enable_bluetooth)); // Show a warning toast.
 
                         break;
