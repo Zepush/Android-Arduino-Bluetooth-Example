@@ -211,7 +211,7 @@
         android:padding="8dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintLeft_toLeftOf="parent"
-        app:srcCompat="@drawable/bluetooth_on" />
+        app:srcCompat="@drawable/ic_bluetooth_on" />
 
     <ImageButton
         android:id="@+id/ib_connect_disconnect"
@@ -219,7 +219,7 @@
         android:layout_height="wrap_content"
         android:background="@android:color/transparent"
         android:padding="8dp"
-        app:srcCompat="@drawable/bluetooth_connect"
+        app:srcCompat="@drawable/ic_bluetooth_connect"
         app:layout_constraintBottom_toBottomOf="parent"
         android:layout_marginBottom="16dp"
         app:layout_constraintLeft_toRightOf="@+id/ib_bluetooth_on_off"

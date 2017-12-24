@@ -250,12 +250,12 @@ public class MainActivity
                 // If Bluetooth is ON:
                 if (intent.getIntExtra(BluetoothAdapter.EXTRA_STATE, 0)
                         == BluetoothAdapter.STATE_ON) {
-                    mIBBluetoothOnOff.setImageResource(R.drawable.bluetooth_off);
+                    mIBBluetoothOnOff.setImageResource(R.drawable.ic_bluetooth_off);
 
                     mGetPairedDevicesList(); // Show the list of paired devices.
                 } else if (intent.getIntExtra(BluetoothAdapter.EXTRA_STATE, 0)
                         == BluetoothAdapter.STATE_OFF) {
-                    mIBBluetoothOnOff.setImageResource(R.drawable.bluetooth_on);
+                    mIBBluetoothOnOff.setImageResource(R.drawable.ic_bluetooth_on);
                 }
             }
         }
@@ -286,7 +286,7 @@ public class MainActivity
 
         mBtConnectionState = true;
 
-        mIBConnectDisconnect.setImageResource(R.drawable.bluetooth_connected);
+        mIBConnectDisconnect.setImageResource(R.drawable.ic_bluetooth_connected);
     }
 
     // Disconnection method:
@@ -299,7 +299,7 @@ public class MainActivity
 
         mBtConnectionState = false;
 
-        mIBConnectDisconnect.setImageResource(R.drawable.bluetooth_connect);
+        mIBConnectDisconnect.setImageResource(R.drawable.ic_bluetooth_connect);
     }
 
     // Flush Stream:
@@ -337,10 +337,10 @@ public class MainActivity
                     case R.id.ib_bluetooth_on_off:
                         if(mBtAdapter.isEnabled()) {
                             mBtAdapter.disable(); // Disable.
-                            mIBBluetoothOnOff.setImageResource(R.drawable.bluetooth_on);
+                            mIBBluetoothOnOff.setImageResource(R.drawable.ic_bluetooth_on);
                         } else {
                             mBtAdapter.enable(); // Enable:
-                            mIBBluetoothOnOff.setImageResource(R.drawable.bluetooth_off);
+                            mIBBluetoothOnOff.setImageResource(R.drawable.ic_bluetooth_off);
                         }
 
                         break;
@@ -393,9 +393,9 @@ public class MainActivity
         mBtAdapter = BluetoothAdapter.getDefaultAdapter();
 
         // Check the Bluetooth status:
-        if(!mBtAdapter.isEnabled()) mIBBluetoothOnOff.setImageResource(R.drawable.bluetooth_on);
+        if(!mBtAdapter.isEnabled()) mIBBluetoothOnOff.setImageResource(R.drawable.ic_bluetooth_on);
         else {
-            mIBBluetoothOnOff.setImageResource(R.drawable.bluetooth_off);
+            mIBBluetoothOnOff.setImageResource(R.drawable.ic_bluetooth_off);
             mGetPairedDevicesList();
         }
 
