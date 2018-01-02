@@ -1,4 +1,4 @@
-# 
+# Android-Arduino-Bluetooth-Example
 
 The project contains:
 - Android application;
