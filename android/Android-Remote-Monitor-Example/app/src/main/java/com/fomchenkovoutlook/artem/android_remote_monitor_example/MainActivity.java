@@ -22,10 +22,6 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.fomchenkovoutlook.artem.android_remote_monitor_example.interfaces.CommunicationInterface;
-import com.fomchenkovoutlook.artem.android_remote_monitor_example.interfaces.DisconnectInterface;
-import com.fomchenkovoutlook.artem.android_remote_monitor_example.interfaces.InitializationInterface;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -34,8 +30,7 @@ import java.util.Set;
 import java.util.UUID;
 
 public class MainActivity
-        extends AppCompatActivity
-            implements InitializationInterface {
+        extends AppCompatActivity {
 
     private TextView mTVShowTemp;
     private TextView mTVShowHumid;
@@ -85,8 +80,7 @@ public class MainActivity
 
     // Control connection and I/O (Class):
     private class ConnectedThread
-            extends Thread
-                implements DisconnectInterface, CommunicationInterface {
+            extends Thread {
 
         private BluetoothSocket mBtSocketCT;
         private InputStream mInStream;
@@ -108,7 +102,7 @@ public class MainActivity
             mOutStream = tmpOut;
         }
 
-        @Override
+        // Read:
         public void read(byte[] buffer, int bytes)
             throws IOException {
 
@@ -119,7 +113,6 @@ public class MainActivity
         }
 
         // Write:
-        @Override
         public void write(String data)
                 throws IOException {
             byte[] msgBuffer = data.getBytes();
@@ -143,7 +136,6 @@ public class MainActivity
         }
 
         // Disconnect:
-        @Override
         public void disconnect()
             throws IOException {
 
@@ -370,7 +362,6 @@ public class MainActivity
         mIBRefresh.setOnClickListener(onClickImageButton);
     }
 
-    @Override
     public void initialization() {
         mTVShowTemp = findViewById(R.id.tv_show_temp);
         mTVShowHumid = findViewById(R.id.tv_show_humid);
