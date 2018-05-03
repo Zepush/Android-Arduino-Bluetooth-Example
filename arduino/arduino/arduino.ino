@@ -7,26 +7,23 @@
 // #include <Adafruit_Sensor.h>
 #include <DHT.h>
 
-// DHT PIN:
-#define DHT_PIN 2
+#define DHT_PIN 2 // DHT PIN.
+#define FIRST_LOOP_DELAY 2000
+#define STANDART_DELAY 1400
+#define ACTION_DELAY 100
 
 // Sensor initialization:
 DHT dht(DHT_PIN, DHT22);
 
-boolean firstLoop = true; // Variable for the first loop initialization.
-
-int firstLoop = 0; // Variable for loop definition.
-
-float temp, humid, MAXT, MINT, MAXH, MINH; // Temperature and humidity + MAX / MIN parameters.
-
-char incomingByte; // Storage of incoming data.
-
 String tempStr, humidStr, MAXTStr, MINTStr, MAXHStr, MINHStr; // Strings for sending data.
+boolean firstLoop = true; // Variable for the first loop initialization.
+int firstLoop = 0; // Variable for loop definition.
+float temp, humid, MAXT, MINT, MAXH, MINH; // Temperature and humidity + MAX / MIN parameters.
+char incomingByte; // Storage of incoming data.
 
 // Set the communication speed and start the sensor:
 void setup() {
   Serial.begin(9600); // Speed.
-
   dht.begin(); // Sensor.
 }
 
@@ -35,11 +32,10 @@ void(* resetFunc) (void) = 0;
 
 void loop() {
   if (firstLoop) {
-    delay (2000)
-      
-      firstLoop = false;
+    delay (FIRST_LOOP_DELAY)
+    firstLoop = false;
   } else {
-    delay(1400);
+    delay(STANDART_DELAY);
   }
 
   temp = dht.readTemperature(); // Get the temperature.
@@ -59,7 +55,6 @@ void loop() {
     } else if(temp <= MINT) {
       MINT = temp;
     }
-
     if(humid >= MAXH) {
       MAXH = humid;
     } else if(temp <= MINH) {
@@ -76,25 +71,25 @@ void loop() {
 
   // Sending data to the application:
   Serial.println("t" + tempStr + " C");
-  delay(100);
+  delay(ACTION_DELAY);
   Serial.println("h" + humidStr + "%");
-  delay(100);
+  delay(ACTION_DELAY);
   Serial.println("m" + MAXTStr + " C");
-  delay(100);
+  delay(ACTION_DELAY);
   Serial.println("i" + MINTStr + " C");
-  delay(100);
+  delay(ACTION_DELAY);
   Serial.println("w" + MAXHStr + "%");
-  delay(100);
+  delay(ACTION_DELAY0);
   Serial.println("q" + MINHStr + "%");
-  delay(100);
+  delay(ACTION_DELAY);
 
   if (Serial.available() > 0) {
-  // read the incoming byte:
-  incomingByte = Serial.read();
+    // read the incoming byte:
+    incomingByte = Serial.read();
 
-  // Reset:
-  if(incomingByte == 'r'){
-    resetFunc();
-  }
+    // Reset:
+    if(incomingByte == 'r') {
+      resetFunc();
+    }
   }
 }

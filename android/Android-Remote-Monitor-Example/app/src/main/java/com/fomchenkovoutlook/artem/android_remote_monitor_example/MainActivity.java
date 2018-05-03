@@ -11,9 +11,9 @@ import android.content.IntentFilter;
 import android.content.pm.ActivityInfo;
 import android.os.Handler;
 import android.os.Message;
+import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
@@ -29,199 +29,144 @@ import java.util.ArrayList;
 import java.util.Set;
 import java.util.UUID;
 
-public class MainActivity
-        extends AppCompatActivity {
-
-    private TextView mTVShowTemp;
-    private TextView mTVShowHumid;
-    private TextView mTVShowMAXT;
-    private TextView mTVShowMINT;
-    private TextView mTVShowMAXH;
-    private TextView mTVShowMINH;
-    private TextView mTVShowSelectedDevice;
-
-    private ListView mLVPairedDevices;
-
-    private ImageButton mIBBluetoothOnOff;
-    private ImageButton mIBConnectDisconnect;
-    private ImageButton mIBRefresh;
-
-    private final UUID mUUID =
-            UUID.fromString("00001101-0000-1000-8000-00805F9B34FB"); // UUID.
-    private final String mTAG = "Message from app: "; // LOG.
-    private final int mRECEIVE_MESSAGE = 1; // Receive message.
-
-    // Symbols for obtaining data from Arduino:
-    private final String mTEMP_SYMBOL = "t"; // Temperature symbol.
-    private final String mHUMID_SYMBOL = "h"; // Humidity symbol.
-    private final String mMAXT_SYMBOL = "m"; // The value of the maximum temperature.
-    private final String mMINT_SYMBOL = "i"; // The value of the minimum temperature.
-    private final String mMAXH_SYMBOL = "w"; // The value of the maximum humidity.
-    private final String mMINH_SYMBOL = "q"; // The value of the minimum humidity.
-
-    // Symbol for sending the Arduino reboot command:
-    private final String mREBOOT_SYMBOL = "r";
-
-    // Bluetooth adapter and Bluetooth socket:
-    private static BluetoothAdapter mBtAdapter;
-    private static BluetoothSocket mBtSocket;
-
-    // Variable for checking connection status:
-    private boolean mBtConnectionState = false;
-
-    // Handler and OutputStream:
-    private Handler mHandlerMessage;
-    private OutputStream mOutStream;
-
-    private ArrayList<String> mDevices = new ArrayList<>(); // Save the list of paired devices.
-    private StringBuilder mStringBuilder = new StringBuilder(); // Working with Arduino data.
-    private String mMACAddress; // Variable to store the MAC address of the selected device.
-    private String mSBPrint; // Save the received message.
+public class MainActivity extends AppCompatActivity {
 
     // Control connection and I/O (Class):
-    private class ConnectedThread
-            extends Thread {
+    private class ConnectionThread extends Thread {
 
-        private BluetoothSocket mBtSocketCT;
-        private InputStream mInStream;
-        private OutputStream mOutStream;
+        private BluetoothSocket bluetoothSocket;
+        private InputStream inputStream;
+        private OutputStream outputStream;
 
-        void getStreams(BluetoothSocket socket) {
-            mBtSocketCT = socket;
-            InputStream tmpIn = null;
-            OutputStream tmpOut = null;
-
+        void initializeStreams(@NonNull BluetoothSocket socket) {
+            bluetoothSocket = socket;
             try {
-                tmpIn = socket.getInputStream();
-                tmpOut = socket.getOutputStream();
-            } catch (IOException e) {
-                e.printStackTrace();
+                inputStream = socket.getInputStream();
+                outputStream = socket.getOutputStream();
+            } catch (IOException initializeStreamsException) {
+                initializeStreamsException.printStackTrace();
             }
-
-            mInStream = tmpIn;
-            mOutStream = tmpOut;
         }
 
         // Read:
-        public void read(byte[] buffer, int bytes)
-            throws IOException {
-
-            bytes = mInStream.read(buffer);
-
-            mHandlerMessage.obtainMessage(mRECEIVE_MESSAGE, bytes, -1, buffer)
-                    .sendToTarget();
+        void read(byte[] buffer) throws IOException {
+            int bytes = inputStream.read(buffer);
+            systemHandler.obtainMessage(RECEIVE_MESSAGE, bytes, -1, buffer).sendToTarget();
         }
 
         // Write:
-        public void write(String data)
-                throws IOException {
-            byte[] msgBuffer = data.getBytes();
-
-            mOutStream.write(msgBuffer);
+        public void write(@NonNull String data) throws IOException {
+            byte[] messageBuffer = data.getBytes();
+            outputStream.write(messageBuffer);
         }
 
         public void run() {
             byte[] buffer = new byte[256];
-
-            int bytes = 0;
-
             while (true) {
                 // Receive the data and send it to the Handler:
                 try {
-                    read(buffer, bytes);
-                } catch (IOException e) {
-                    e.printStackTrace();
+                    read(buffer);
+                } catch (IOException readFromBufferException) {
+                    readFromBufferException.printStackTrace();
                 }
             }
         }
 
         // Disconnect:
-        public void disconnect()
-            throws IOException {
-
-            mBtSocketCT.close();
+        void disconnect() throws IOException {
+            bluetoothSocket.close();
         }
 
-        ConnectedThread(BluetoothSocket socket) {
-            getStreams(socket);
+        ConnectionThread(@NonNull BluetoothSocket bluetoothSocket) {
+            initializeStreams(bluetoothSocket);
         }
     }
+
+    private TextView tvShowTemp;
+    private TextView tvShowHumid;
+    private TextView tvShowMAXT;
+    private TextView tvShowMINT;
+    private TextView tvShowMAXH;
+    private TextView tvShowMINH;
+    private TextView tvShowSelectedDevice;
+    private ListView vlPairedDevices;
+    private ImageButton ibBluetoothOnOff;
+    private ImageButton ibConnectDisconnect;
+
+    private final UUID BLUETOOTH_UUID = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB");
+    private final int RECEIVE_MESSAGE = 1;
 
     // Control connection and I/O:
-    private ConnectedThread mConnectedThread;
+    private ConnectionThread connectionThread;
 
-    // Logging:
-    private void mLOG(String msg) {
-        Log.e(mTAG, msg);
-    }
+    // Symbols for obtaining data from Arduino:
+    private final String TEMP_SYMBOL = "t"; // Temperature symbol.
+    private final String HUMID_SYMBOL = "h"; // Humidity symbol.
+    private final String MAXT_SYMBOL = "m"; // Maximum temperature.
+    private final String MINT_SYMBOL = "i"; // Minimum temperature.
+    private final String MAXH_SYMBOL = "w"; // Maximum humidity.
+    private final String MINH_SYMBOL = "q"; // Minimum humidity.
+    private final String REBOOT_SYMBOL = "r"; // Reboot system.
+
+    private static BluetoothAdapter bluetoothAdapter;
+    private static BluetoothSocket bluetoothSocket;
+
+    // Variable for checking connection status:
+    private boolean bluetoothConnectionState = false;
+
+    private Handler systemHandler;
+    private ArrayList<String> devicesList = new ArrayList<>(); // Save the list of paired devices.
+    private StringBuilder messageData = new StringBuilder(); // Working with Arduino data.
+    private String macAddress; // Variable to store the MAC address of the selected device.
+    private String toOutputDataBuilder; // Save the received message.
 
     // Get the paired devices list:
-    private void mGetPairedDevicesList() {
-        Set<BluetoothDevice> pairedDevices = mBtAdapter.getBondedDevices();
-
+    private void initializePairedDevices() {
+        Set<BluetoothDevice> pairedDevices = bluetoothAdapter.getBondedDevices();
         if (pairedDevices.size() > 0) {
             final ArrayList<String> pairedDeviceArrayList = new ArrayList<>();
-
             for (BluetoothDevice device : pairedDevices) {
                 pairedDeviceArrayList.add(device.getName() + '\n' + device.getAddress());
-                mDevices.add(device.getAddress());
+                devicesList.add(device.getAddress());
             }
-
             final ArrayAdapter<String> pairedDeviceAdapter = new ArrayAdapter<>(this,
                     android.R.layout.simple_list_item_1, pairedDeviceArrayList);
-            mLVPairedDevices.setAdapter(pairedDeviceAdapter);
+            vlPairedDevices.setAdapter(pairedDeviceAdapter);
         }
     }
 
     // Handler to work with the received data:
     @SuppressLint("HandlerLeak")
     private void mHandlerMessageView() {
-        mHandlerMessage = new Handler() {
+        systemHandler = new Handler() {
             public void handleMessage(Message msg) {
                 switch (msg.what) {
-                    case mRECEIVE_MESSAGE:
+                    case RECEIVE_MESSAGE:
                         byte[] readBuffer = (byte[]) msg.obj;
-
                         String strInCOM = new String(readBuffer, 0, msg.arg1);
-
-                        mStringBuilder.append(strInCOM);
-
-                        int endOfLineIndex = mStringBuilder.indexOf("\r\n");
-
+                        messageData.append(strInCOM);
+                        int endOfLineIndex = messageData.indexOf("\r\n");
                         if (endOfLineIndex > 0) {
-                            mSBPrint = mStringBuilder.substring(0, endOfLineIndex);
-                            mStringBuilder.delete(0, mStringBuilder.length());
-
-                            switch (mSBPrint.substring(0, 1)) {
-                                case mTEMP_SYMBOL:
-                                    mTVShowTemp.setText(mSBPrint
-                                            .substring(1, endOfLineIndex));
-
+                            toOutputDataBuilder = messageData.substring(0, endOfLineIndex);
+                            messageData.delete(0, messageData.length());
+                            switch (toOutputDataBuilder.substring(0, 1)) {
+                                case TEMP_SYMBOL:
+                                    tvShowTemp.setText(toOutputDataBuilder.substring(1, endOfLineIndex));
                                     break;
-                                case mHUMID_SYMBOL:
-                                    mTVShowHumid.setText(mSBPrint
-                                            .substring(1, endOfLineIndex));
-
+                                case HUMID_SYMBOL:
+                                    tvShowHumid.setText(toOutputDataBuilder.substring(1, endOfLineIndex));
                                     break;
-                                case mMAXT_SYMBOL:
-                                    mTVShowMAXT.setText(mSBPrint
-                                            .substring(1, endOfLineIndex));
-
+                                case MAXT_SYMBOL:
+                                    tvShowMAXT.setText(toOutputDataBuilder.substring(1, endOfLineIndex));
                                     break;
-                                case mMINT_SYMBOL:
-                                    mTVShowMINT.setText(mSBPrint
-                                            .substring(1, endOfLineIndex));
-
+                                case MINT_SYMBOL:
+                                    tvShowMINT.setText(toOutputDataBuilder.substring(1, endOfLineIndex));
                                     break;
-                                case mMAXH_SYMBOL:
-                                    mTVShowMAXH.setText(mSBPrint
-                                            .substring(1, endOfLineIndex));
-
+                                case MAXH_SYMBOL:
+                                    tvShowMAXH.setText(toOutputDataBuilder.substring(1, endOfLineIndex));
                                     break;
-                                case mMINH_SYMBOL:
-                                    mTVShowMINH.setText(mSBPrint
-                                            .substring(1, endOfLineIndex));
-
+                                case MINH_SYMBOL:
+                                    tvShowMINH.setText(toOutputDataBuilder.substring(1, endOfLineIndex));
                                     break;
                             }
                         }
@@ -234,176 +179,138 @@ public class MainActivity
      * Changes the state of the application elements when changing Bluetooth state using the operating
      * system or other applications.
      */
-    private final BroadcastReceiver mReceiverBluetoothWaiting = new BroadcastReceiver() {
+    private final BroadcastReceiver bluetoothWaitingReceiver = new BroadcastReceiver() {
         public void onReceive(Context context, Intent intent) {
             String action = intent.getAction();
-
             if (BluetoothAdapter.ACTION_STATE_CHANGED.equals(action)) {
-                // If Bluetooth is ON:
-                if (intent.getIntExtra(BluetoothAdapter.EXTRA_STATE, 0)
-                        == BluetoothAdapter.STATE_ON) {
-                    mIBBluetoothOnOff.setImageResource(R.drawable.ic_bluetooth_off);
-
-                    mGetPairedDevicesList(); // Show the list of paired devices.
-                } else if (intent.getIntExtra(BluetoothAdapter.EXTRA_STATE, 0)
-                        == BluetoothAdapter.STATE_OFF) {
-                    mIBBluetoothOnOff.setImageResource(R.drawable.ic_bluetooth_on);
+                switch (intent.getIntExtra(BluetoothAdapter.EXTRA_STATE, 0)) {
+                    case BluetoothAdapter.STATE_ON:
+                        ibBluetoothOnOff.setImageResource(R.drawable.ic_bluetooth_off);
+                        initializePairedDevices(); // Show the list of paired devices.
+                        break;
+                    case BluetoothAdapter.STATE_OFF:
+                        ibBluetoothOnOff.setImageResource(R.drawable.ic_bluetooth_on);
+                        break;
                 }
             }
         }
     };
 
     // Connection method:
-    private void mConnect() {
-        BluetoothDevice BtDevice = mBtAdapter.getRemoteDevice(mMACAddress);
-
+    private void connect() {
+        BluetoothDevice BtDevice = bluetoothAdapter.getRemoteDevice(macAddress);
         try {
-            mBtSocket = BtDevice.createRfcommSocketToServiceRecord(mUUID);
-        } catch (IOException e) {
-            mLOG(e.getMessage());
-        }
-
-        try {
-            mBtSocket.connect();
-        } catch (IOException e) {
+            bluetoothSocket = BtDevice.createRfcommSocketToServiceRecord(BLUETOOTH_UUID);
+            bluetoothSocket.connect();
+            connectionThread = new ConnectionThread(bluetoothSocket);
+            connectionThread.start();
+            bluetoothConnectionState = true;
+            ibConnectDisconnect.setImageResource(R.drawable.ic_bluetooth_connected);
+        } catch (IOException bluetoothConnectionException) {
             try {
-                mBtSocket.close();
-            } catch (IOException e2) {
-                mLOG(e2.getMessage());
+                bluetoothSocket.close();
+            } catch (IOException bluetoothConnectException) {
+                bluetoothConnectException.printStackTrace();
             }
         }
-
-        mConnectedThread = new ConnectedThread(mBtSocket);
-        mConnectedThread.start();
-
-        mBtConnectionState = true;
-
-        mIBConnectDisconnect.setImageResource(R.drawable.ic_bluetooth_connected);
     }
 
     // Disconnection method:
-    private void mDisconnect() {
+    private void disconnect() {
         try {
-            mConnectedThread.disconnect();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-        mBtConnectionState = false;
-
-        mIBConnectDisconnect.setImageResource(R.drawable.ic_bluetooth_connect);
-    }
-
-    // Flush Stream:
-    private void mFlushStream() {
-        if(mOutStream != null) {
-            try {
-                mOutStream.flush();
-            } catch (IOException e) {
-                mLOG(e.getMessage());
-            }
+            connectionThread.disconnect();
+            bluetoothConnectionState = false;
+            ibConnectDisconnect.setImageResource(R.drawable.ic_bluetooth_connect);
+        } catch (IOException bluetoothDisconnectException) {
+            bluetoothDisconnectException.printStackTrace();
         }
     }
 
     // A simple toast for viewing warning messages:
-    private void mToast(String msg) {
-        Toast toast = Toast.makeText(getApplicationContext(), msg, Toast.LENGTH_SHORT);
-        toast.show();
-    }
-
-    private void mSetListViewItemSelect() {
-        mLVPairedDevices.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-                mMACAddress = mDevices.get(i); // Get the device MAC address to variable.
-                mTVShowSelectedDevice.setText(mMACAddress); // Set the selected MAC address to mTVShowSelectedDevice.
-            }
-        });
-    }
-
-    private void mSetImageButtons() {
-        ImageButton.OnClickListener onClickImageButton = new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                switch (view.getId()) {
-                    case R.id.ib_bluetooth_on_off:
-                        if(mBtAdapter.isEnabled()) {
-                            mBtAdapter.disable(); // Disable.
-                            mIBBluetoothOnOff.setImageResource(R.drawable.ic_bluetooth_on);
-                        } else {
-                            mBtAdapter.enable(); // Enable:
-                            mIBBluetoothOnOff.setImageResource(R.drawable.ic_bluetooth_off);
-                        }
-
-                        break;
-                    case R.id.ib_connect_disconnect:
-                        if(mBtAdapter.isEnabled()) {
-                            if(!mBtConnectionState) mConnect(); // Connect.
-                            else mDisconnect(); // Disconnect.
-                        } else mToast("Turn on Bluetooth!");
-
-                        break;
-                    case R.id.ib_refresh:
-                        if(mBtAdapter.isEnabled())
-                            try {
-                                mConnectedThread.write(mREBOOT_SYMBOL); // Write.
-                            } catch (IOException e) {
-                                e.printStackTrace();
-                            }
-                        else mToast(getString(R.string.enable_bluetooth)); // Show a warning toast.
-
-                        break;
-                }
-            }
-        };
-
-        mIBBluetoothOnOff.setOnClickListener(onClickImageButton);
-        mIBConnectDisconnect.setOnClickListener(onClickImageButton);
-        mIBRefresh.setOnClickListener(onClickImageButton);
+    private void showToast(@NonNull String message) {
+        Toast.makeText(getApplicationContext(), message, Toast.LENGTH_SHORT).show();
     }
 
     public void initialization() {
-        mTVShowTemp = findViewById(R.id.tv_show_temp);
-        mTVShowHumid = findViewById(R.id.tv_show_humid);
-        mTVShowMAXT = findViewById(R.id.tv_show_MAX_T);
-        mTVShowMINT = findViewById(R.id.tv_show_MIN_T);
-        mTVShowMAXH = findViewById(R.id.tv_show_MAX_H);
-        mTVShowMINH = findViewById(R.id.tv_show_MIN_H);
-        mTVShowSelectedDevice = findViewById(R.id.tv_selected_device);
+        tvShowTemp = findViewById(R.id.tv_show_temp);
+        tvShowHumid = findViewById(R.id.tv_show_humid);
+        tvShowMAXT = findViewById(R.id.tv_show_max_t);
+        tvShowMINT = findViewById(R.id.tv_show_min_t);
+        tvShowMAXH = findViewById(R.id.tv_show_max_h);
+        tvShowMINH = findViewById(R.id.tv_show_min_h);
+        tvShowSelectedDevice = findViewById(R.id.tv_selected_device);
+        vlPairedDevices = findViewById(R.id.lv_paired_devices);
+        ibBluetoothOnOff = findViewById(R.id.ib_bluetooth_on_off);
+        ibConnectDisconnect = findViewById(R.id.ib_connect_disconnect);
 
-        mLVPairedDevices = findViewById(R.id.lv_paired_devices);
+        ibBluetoothOnOff.setOnClickListener(new View.OnClickListener() {
 
-        mIBBluetoothOnOff = findViewById(R.id.ib_bluetooth_on_off);
-        mIBConnectDisconnect = findViewById(R.id.ib_connect_disconnect);
-        mIBRefresh = findViewById(R.id.ib_refresh);
+            @Override
+            public void onClick(View v) {
+                if(bluetoothAdapter.isEnabled()) {
+                    bluetoothAdapter.disable(); // Disable.
+                    ibBluetoothOnOff.setImageResource(R.drawable.ic_bluetooth_on);
+                } else {
+                    bluetoothAdapter.enable(); // Enable:
+                    ibBluetoothOnOff.setImageResource(R.drawable.ic_bluetooth_off);
+                }
+            }
+        });
+        ibConnectDisconnect.setOnClickListener(new View.OnClickListener() {
 
-        // Register a Receiver:
-        registerReceiver(mReceiverBluetoothWaiting, new IntentFilter(BluetoothAdapter.ACTION_STATE_CHANGED));
+            @Override
+            public void onClick(View v) {
+                if(bluetoothAdapter.isEnabled()) {
+                    if(!bluetoothConnectionState) connect(); // Connect.
+                    else disconnect(); // Disconnect.
+                } else {
+                    showToast("Turn on Bluetooth!");
+                }
+            }
+        });
+        findViewById(R.id.ib_refresh).setOnClickListener(new View.OnClickListener() {
 
-        // Get the default Bluetooth adapter:
-        mBtAdapter = BluetoothAdapter.getDefaultAdapter();
+            @Override
+            public void onClick(View v) {
+                if(bluetoothAdapter.isEnabled())
+                    try {
+                        connectionThread.write(REBOOT_SYMBOL);
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                else {
+                    showToast(getString(R.string.enable_bluetooth));
+                }
+            }
+        });
 
-        // Check the Bluetooth status:
-        if(!mBtAdapter.isEnabled()) mIBBluetoothOnOff.setImageResource(R.drawable.ic_bluetooth_on);
-        else {
-            mIBBluetoothOnOff.setImageResource(R.drawable.ic_bluetooth_off);
-            mGetPairedDevicesList();
+        vlPairedDevices.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+
+            @Override
+            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+                macAddress = devicesList.get(i);
+                tvShowSelectedDevice.setText(macAddress); // Set the selected MAC address to tvShowSelectedDevice.
+            }
+        });
+
+        registerReceiver(bluetoothWaitingReceiver, new IntentFilter(BluetoothAdapter.ACTION_STATE_CHANGED));
+        bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
+        if(!bluetoothAdapter.isEnabled()) {
+            ibBluetoothOnOff.setImageResource(R.drawable.ic_bluetooth_on);
+        } else {
+            ibBluetoothOnOff.setImageResource(R.drawable.ic_bluetooth_off);
+            initializePairedDevices();
         }
 
         // Waiting for the adoption of data:
         mHandlerMessageView();
-
-        mSetListViewItemSelect();
-        mSetImageButtons();
     }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
         setContentView(R.layout.activity_main);
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT); // Only portrait.
-
         initialization();
     }
 
@@ -411,14 +318,16 @@ public class MainActivity
     @Override
     public void onPause() {
         super.onPause();
-
-        mFlushStream();
-    }
-
-    @Override
-    protected void onSaveInstanceState(Bundle outState) {
-        super.onSaveInstanceState(outState);
-
-        mFlushStream();
+        // Flush stream:
+        if (connectionThread != null) {
+            OutputStream bluetoothStream = connectionThread.outputStream;
+            if (bluetoothStream != null) {
+                try {
+                    bluetoothStream.flush();
+                } catch (IOException streamFlushException) {
+                    streamFlushException.printStackTrace();
+                }
+            }
+        }
     }
 }

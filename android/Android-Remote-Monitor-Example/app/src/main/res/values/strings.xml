@@ -11,4 +11,7 @@
     <string name="min_h">MIN H:</string>
     <string name="selected_device">Selected device:</string>
     <string name="not_selected">Not selected</string>
+    <string name="on_or_off_bluetooth">On or off Bluetooth</string>
+    <string name="connect_or_disconnect">Connect or disconnect</string>
+    <string name="reload_system">Reload system</string>
 </resources>
