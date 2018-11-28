@@ -1,5 +1,7 @@
 # Android-Arduino-Bluetooth-Example
 
+App using [ButterKnife](https://github.com/JakeWharton/butterknife) for UI binding
+
 The project contains:
 - Android application;
 - Arduino source code.

@@ -2,19 +2,17 @@
 <android.support.constraint.ConstraintLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="com.fomchenkovoutlook.artem.android_remote_monitor_example.MainActivity"
     android:screenOrientation="portrait" >
 
     <TextView
-        android:id="@+id/tv_temp"
+        android:id="@+id/title_temperature"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="16dp"
         android:layout_marginTop="16dp"
-        android:text="@string/temperature"
+        android:text="@string/title_temperature"
         android:textAllCaps="true"
         android:textAppearance="@style/TextAppearance.AppCompat.Display1"
         android:textSize="28sp"
@@ -22,208 +20,207 @@
         app:layout_constraintTop_toTopOf="parent" />
 
     <TextView
-        android:id="@+id/tv_show_temp"
+        android:id="@+id/temperature"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginEnd="16dp"
         android:layout_marginTop="16dp"
-        android:text="@string/nan"
+        android:text="@string/common_nan"
         android:textAppearance="@style/TextAppearance.AppCompat.Display1"
         android:textSize="28sp"
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
     <TextView
-        android:id="@+id/tv_humid"
+        android:id="@+id/title_humidity"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="8dp"
-        android:text="@string/humidity"
+        android:text="@string/title_humidity"
         android:textAllCaps="true"
         android:textAppearance="@style/TextAppearance.AppCompat.Display1"
         android:textSize="28sp"
-        app:layout_constraintStart_toStartOf="@+id/tv_temp"
-        app:layout_constraintTop_toBottomOf="@+id/tv_temp" />
+        app:layout_constraintStart_toStartOf="@+id/title_temperature"
+        app:layout_constraintTop_toBottomOf="@+id/title_temperature" />
 
     <TextView
-        android:id="@+id/tv_show_humid"
+        android:id="@+id/humidity"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="8dp"
-        android:text="@string/nan"
+        android:text="@string/common_nan"
         android:textAppearance="@style/TextAppearance.AppCompat.Display1"
         android:textSize="28sp"
-        app:layout_constraintEnd_toEndOf="@+id/tv_show_temp"
-        app:layout_constraintTop_toBottomOf="@+id/tv_show_temp" />
+        app:layout_constraintEnd_toEndOf="@+id/temperature"
+        app:layout_constraintTop_toBottomOf="@+id/temperature" />
 
     <TextView
-        android:id="@+id/tv_max_t"
+        android:id="@+id/title_temperature_max"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="16dp"
-        android:text="@string/max_t"
+        android:text="@string/data_title_max_tempterature"
         android:textAppearance="@style/TextAppearance.AppCompat.Display1"
         android:textSize="14sp"
-        app:layout_constraintStart_toStartOf="@+id/tv_humid"
-        app:layout_constraintTop_toBottomOf="@+id/tv_humid" />
+        app:layout_constraintStart_toStartOf="@+id/title_humidity"
+        app:layout_constraintTop_toBottomOf="@+id/title_humidity" />
 
     <TextView
-        android:id="@+id/tv_min_t"
+        android:id="@+id/title_temperature_min"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="8dp"
-        android:text="@string/min_t"
+        android:text="@string/data_title_min_temperature"
         android:textAppearance="@style/TextAppearance.AppCompat.Display1"
         android:textSize="14sp"
-        app:layout_constraintStart_toStartOf="@+id/tv_max_t"
-        app:layout_constraintTop_toBottomOf="@+id/tv_max_t" />
+        app:layout_constraintStart_toStartOf="@+id/title_temperature_max"
+        app:layout_constraintTop_toBottomOf="@+id/title_temperature_max" />
 
     <TextView
-        android:id="@+id/tv_show_max_t"
+        android:id="@+id/max_temperature"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="24dp"
         android:layout_marginTop="8dp"
-        android:text="@string/nan"
+        android:text="@string/common_nan"
         android:textAlignment="center"
         android:textAppearance="@style/TextAppearance.AppCompat.Display1"
         android:textSize="14sp"
-        app:layout_constraintBottom_toBottomOf="@+id/tv_max_t"
-        app:layout_constraintStart_toEndOf="@+id/tv_max_t"
-        app:layout_constraintTop_toBottomOf="@+id/tv_humid"
+        app:layout_constraintBottom_toBottomOf="@+id/title_temperature_max"
+        app:layout_constraintStart_toEndOf="@+id/title_temperature_max"
+        app:layout_constraintTop_toBottomOf="@+id/title_humidity"
         app:layout_constraintVertical_bias="1.0" />
 
     <TextView
-        android:id="@+id/tv_show_min_t"
+        android:id="@+id/min_temperature"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="8dp"
-        android:text="@string/nan"
+        android:text="@string/common_nan"
         android:textAppearance="@style/TextAppearance.AppCompat.Display1"
         android:textSize="14sp"
-        app:layout_constraintStart_toStartOf="@+id/tv_show_max_t"
-        app:layout_constraintTop_toBottomOf="@+id/tv_show_max_t" />
+        app:layout_constraintStart_toStartOf="@+id/max_temperature"
+        app:layout_constraintTop_toBottomOf="@+id/max_temperature" />
 
     <TextView
-        android:id="@+id/tv_max_h"
+        android:id="@+id/title_humidity_max"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="32dp"
-        android:text="@string/max_h"
+        android:text="@string/data_title_max_humidity"
         android:textAppearance="@style/TextAppearance.AppCompat.Display1"
         android:textSize="14sp"
-        app:layout_constraintStart_toEndOf="@+id/tv_show_max_t"
-        app:layout_constraintTop_toTopOf="@+id/tv_show_max_t" />
+        app:layout_constraintStart_toEndOf="@+id/max_temperature"
+        app:layout_constraintTop_toTopOf="@+id/max_temperature" />
 
     <TextView
-        android:id="@+id/tv_min_h"
+        android:id="@+id/title_humidity_min"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginBottom="8dp"
         android:layout_marginTop="8dp"
-        android:text="@string/min_h"
+        android:text="@string/data_title_min_humidity"
         android:textAppearance="@style/TextAppearance.AppCompat.Display1"
         android:textSize="14sp"
-        app:layout_constraintBottom_toBottomOf="@+id/tv_show_min_h"
-        app:layout_constraintEnd_toEndOf="@+id/tv_max_h"
-        app:layout_constraintTop_toBottomOf="@+id/tv_max_h"
+        app:layout_constraintBottom_toBottomOf="@+id/min_humidity"
+        app:layout_constraintEnd_toEndOf="@+id/title_humidity_max"
+        app:layout_constraintTop_toBottomOf="@+id/title_humidity_max"
         app:layout_constraintVertical_bias="0.0" />
 
     <TextView
-        android:id="@+id/tv_show_max_h"
+        android:id="@+id/max_humidity"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
-        android:text="@string/nan"
+        android:text="@string/common_nan"
         android:textAppearance="@style/TextAppearance.AppCompat.Display1"
         android:textSize="14sp"
-        app:layout_constraintStart_toEndOf="@+id/tv_max_h"
-        app:layout_constraintTop_toTopOf="@+id/tv_show_max_t" />
+        app:layout_constraintStart_toEndOf="@+id/title_humidity_max"
+        app:layout_constraintTop_toTopOf="@+id/max_temperature" />
 
     <TextView
-        android:id="@+id/tv_show_min_h"
+        android:id="@+id/min_humidity"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="8dp"
-        android:text="@string/nan"
+        android:text="@string/common_nan"
         android:textAppearance="@style/TextAppearance.AppCompat.Display1"
         android:textSize="14sp"
-        app:layout_constraintStart_toStartOf="@+id/tv_show_max_h"
-        app:layout_constraintTop_toBottomOf="@+id/tv_show_max_h" />
+        app:layout_constraintStart_toStartOf="@+id/max_humidity"
+        app:layout_constraintTop_toBottomOf="@+id/max_humidity" />
 
     <TextView
-        android:id="@+id/tv_selected_device"
+        android:id="@+id/selected_device"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="16dp"
         android:layout_marginTop="8dp"
-        android:text="@string/selected_device"
+        android:text="@string/common_selected_device"
         android:textAppearance="@style/TextAppearance.AppCompat.Display1"
         android:textSize="18sp"
         app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/tv_show_min_t" />
+        app:layout_constraintTop_toBottomOf="@+id/min_temperature" />
 
     <TextView
-        android:id="@+id/tv_show_selected_device"
+        android:id="@+id/paired_device"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginEnd="16dp"
         android:layout_marginTop="8dp"
-        android:text="@string/not_selected"
+        android:text="@string/common_not_selected"
         android:textAllCaps="true"
         android:textAppearance="@style/TextAppearance.AppCompat.Display1"
         android:textSize="18sp"
         app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/tv_min_h" />
+        app:layout_constraintTop_toBottomOf="@+id/title_humidity_min" />
 
     <ListView
-        android:id="@+id/lv_paired_devices"
+        android:id="@+id/paired_devices_list"
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:layout_marginBottom="16dp"
         android:layout_marginLeft="16dp"
         android:layout_marginRight="16dp"
         android:layout_marginTop="16dp"
-        app:layout_constraintBottom_toTopOf="@+id/ll_action_items"
+        app:layout_constraintBottom_toTopOf="@+id/bluetooth_actions"
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/tv_selected_device"
+        app:layout_constraintTop_toBottomOf="@+id/selected_device"
         app:layout_constraintVertical_bias="1.0" />
 
     <LinearLayout
-        android:id="@+id/ll_action_items"
-        android:layout_width="123dp"
+        android:id="@+id/bluetooth_actions"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginBottom="8dp"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toStartOf="@+id/lv_paired_devices">
+        app:layout_constraintStart_toStartOf="@+id/paired_devices_list">
 
         <ImageButton
-            android:id="@+id/ib_bluetooth_on_off"
+            android:id="@+id/on_off"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:background="@android:color/transparent"
-            android:contentDescription="@string/on_or_off_bluetooth"
             android:padding="8dp"
             app:srcCompat="@drawable/ic_bluetooth_on" />
 
         <ImageButton
-            android:id="@+id/ib_connect_disconnect"
+            android:id="@+id/connect_disconnect"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:background="@android:color/transparent"
-            android:contentDescription="@string/connect_or_disconnect"
             android:padding="8dp"
             app:srcCompat="@drawable/ic_bluetooth_connect" />
 
         <ImageButton
-            android:id="@+id/ib_refresh"
+            android:id="@+id/refresh"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:background="@android:color/transparent"
-            android:contentDescription="@string/reload_system"
             android:padding="8dp"
-            app:srcCompat="@drawable/refresh" />
+            app:srcCompat="@drawable/ic_refresh" />
+
     </LinearLayout>
+
 </android.support.constraint.ConstraintLayout>

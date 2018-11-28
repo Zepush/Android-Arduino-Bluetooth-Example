@@ -1,17 +1,20 @@
 <resources>
     <string name="app_name">Android-Remote-Monitor-Example</string>
 
-    <string name="enable_bluetooth">Enable the Bluetooth!</string>
-    <string name="temperature">Temperature:</string>
-    <string name="nan">NAN</string>
-    <string name="humidity">Humidity:</string>
-    <string name="max_t">MAX T:</string>
-    <string name="min_t">MIN T:</string>
-    <string name="max_h">MAX H:</string>
-    <string name="min_h">MIN H:</string>
-    <string name="selected_device">Selected device:</string>
-    <string name="not_selected">Not selected</string>
-    <string name="on_or_off_bluetooth">On or off Bluetooth</string>
-    <string name="connect_or_disconnect">Connect or disconnect</string>
-    <string name="reload_system">Reload system</string>
+    <!-- main parameters titles: -->
+    <string name="title_temperature">Temperature:</string>
+    <string name="title_humidity">Humidity:</string>
+
+    <!-- data titles: -->
+    <string name="data_title_max_tempterature">MAX T:</string>
+    <string name="data_title_min_temperature">MIN T:</string>
+    <string name="data_title_max_humidity">MAX H:</string>
+    <string name="data_title_min_humidity">MIN H:</string>
+
+    <!-- commons: -->
+    <string name="common_enable_bluetooth">Enable Bluetooth!</string>
+    <string name="common_selected_device">Selected device:</string>
+    <string name="common_nan">NAN</string>
+    <string name="common_not_selected">Not selected</string>
+
 </resources>
